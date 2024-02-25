@@ -3,7 +3,6 @@ from copy import copy
 
 
 class Action(object):
-
     def __init__(self):
         self._next = None
         self._node = None
@@ -21,12 +20,19 @@ class Action(object):
         self.chain(other)
         return self
 
+    def __radd__(self, other):
+        if type(other) is type:
+            other = other()
+        else:
+            other = other.copy()
+        other.chain(self)
+
     def copy(self):
         obj = copy(self)
         if self._next is not None:
             obj._next = self._next.copy()
         return obj
-    
+
     def chain(self, other):
         if self._next is not None:
             self._next.chain(other)
@@ -44,22 +50,11 @@ class Action(object):
         return self
 
     def end(self):
-        if hasattr(self, "_cObj") and self._cObj is not None:
-            self._cObj.End()
-        else:
-            self.on_end()
+        self.on_end()
 
     def abort(self):
         self._aborted = True
         self.end()
-
-    def __radd__(self, other):
-        if type(other) is type:
-            other = other()
-        else:
-            other = other.copy()
-        other.chain(self)
-        
 
     def do(self, *actors):
         if not actors:
