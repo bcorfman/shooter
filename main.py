@@ -8,6 +8,7 @@ NUM_STARS = 100
 STAR_COLOR_HIGH = 12
 STAR_COLOR_LOW = 5
 
+
 class Background:
     def __init__(self):
         self.stars = []
@@ -31,6 +32,7 @@ class Background:
         for x, y, speed in self.stars:
             pyxel.pset(x, y, STAR_COLOR_HIGH if speed > 1.8 else STAR_COLOR_LOW)
 
+
 class App:
     def __init__(self):
         pyxel.init(120, 160, title="Space Shooter")
@@ -46,5 +48,6 @@ class App:
     def draw(self):
         pyxel.cls(0)
         self.background.draw()
+
 
 App()
