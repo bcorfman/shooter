@@ -1,0 +1,32 @@
+[project]
+name = "shooter"
+version = "0.1.0"
+description = "Top-down space shooter using Pyxel"
+authors = [
+    { name = "Brandon Corfman", email = "bcorfman@fastmail.fm" }
+]
+dependencies = [
+    "pyxel>=2.0.7",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[tool.rye.scripts]
+game = { cmd = "python main.py" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "ipython>=8.12.3",
+    "pytest>=8.0.1",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["core"]
