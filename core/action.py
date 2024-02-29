@@ -1,5 +1,10 @@
 import sys, traceback
 from copy import copy
+from .vector2 import Vector2
+
+StopMode = 0
+RepeatMode = 1
+PingPongMode = 2
 
 
 class Action(object):
@@ -94,3 +99,83 @@ class Action(object):
             traceback.print_exc(sys.stdout)
             sys.stdout.flush()
             raise
+
+
+class CallFunc(Action):
+    def __init__(self, _func, *arg, **kw):
+        self.func = _func
+        self.arg = arg
+        self.kw = kw
+        Action.__init__(self)
+
+    def on_activate(self):
+        self.func(*self.arg, **self.kw)
+        self.on_end()
+
+
+class CallFuncNode(CallFunc):
+    def on_activate(self):
+        self.func(self._node, *self.arg, **self.kw)
+
+
+class Delete(Action):
+    def on_activate(self):
+        n = self._node
+        self._node = None
+        self.on_end()
+        if n is not None:
+            n.delete()
+
+
+class Repeat(Action):
+    def __init__(self, action, repeats=None):
+        self.action = action
+        self.repeats = repeats
+        Action.__init__(self)
+
+    def on_activate(self):
+        if self.repeats is None:
+            do = True
+        elif self.repeats > 0:
+            do = True
+            self.repeats -= 1
+        else:
+            do = False
+        if do:
+            act = self.action.copy() + CallFunc(self.activate)
+            act.do(self._node)
+        else:
+            self.on_end()
+
+
+class Move(Action):
+    def __init__(self, velocity):
+        Action.__init__(self)
+        self.velocity = velocity
+
+    def on_activate(self):
+        self.activate(Move, Vector2(*self.velocity))
+
+
+class Delay(Action):
+    _needs_node = False
+
+    def __init__(self, secs):
+        Action.__init__(self)
+        self.secs = secs
+
+    def on_activate(self):
+        self.activate(Delay, self.secs)
+
+
+class IntervalAction(Action):
+    def __init__(self, secs, mode=StopMode):
+        Action.__init__(self)
+        self.secs = secs
+        self.mode = mode
+        self.fadein = None
+
+    def smooth(self, fadein, fadeout):
+        self.fadein = fadein
+        self.fadeout = fadeout
+        return self
